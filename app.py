@@ -8,12 +8,30 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
-responses = []
+responses = [] 
 
 @app.get('/')
 def show_survey_start():
-    #title, instructions
+    """returns the start of the survey with title and instructions"""
     title = survey.title
     instructions = survey.instructions
 
     return render_template("survey_start.html", title=title, instructions=instructions)
+
+@app.get('/begin')
+def begin_survey():
+    breakpoint()
+    return redirect('/questions/0')
+
+@app.get('/questions/0')
+def first_question():
+    """returns first question"""
+
+    prompt = survey.questions[0].prompt
+    choices = survey.questions[0].choices
+
+    return render_template("question.html", prompt=prompt, choices=choices)
+
+@app.get('/answer')
+def answer():
+    print(request.form)
