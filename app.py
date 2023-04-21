@@ -14,6 +14,7 @@ responses = []
 @app.get('/')
 def show_survey_start():
     """returns the start of the survey with title and instructions"""
+
     title = survey.title
     instructions = survey.instructions
 
@@ -22,22 +23,32 @@ def show_survey_start():
 @app.post('/begin')
 def begin_survey():
     """redirect to the first question page"""
+
     return redirect('/questions/0')
 
-@app.get(f'/questions/{len(responses)}')
-def first_question():
+@app.get('/questions/<number>')
+def show_question(number):
     """returns question"""
 
     prompt = survey.questions[len(responses)].prompt
     choices = survey.questions[len(responses)].choices
-
+    # breakpoint()
     return render_template("question.html", prompt=prompt, choices=choices)
 
 @app.post('/answer')
 def answer():
+    """updates responses and returns next question or completion page if survey is done"""
+
     responses.append(request.form["answer"])
     # responses_length = len(responses)
     if (len(responses) == len(survey.questions)):
-        return redirect('/completion.html')
+        return redirect('/completion')
     else:
+        # breakpoint()
         return redirect(f'/questions/{len(responses)}')
+
+@app.get('/completion')
+def completed_survey():
+    """brings user to thank you page when done"""
+
+    return render_template("completion.html")
