@@ -8,8 +8,6 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
-responses = []
-# responses_length = len(responses)
 
 @app.get('/')
 def show_survey_start():
@@ -24,28 +22,38 @@ def show_survey_start():
 def begin_survey():
     """redirect to the first question page"""
 
+    session['responses'] = []
+
     return redirect('/questions/0')
 
 @app.get('/questions/<number>')
 def show_question(number):
     """returns question"""
 
-    prompt = survey.questions[len(responses)].prompt
-    choices = survey.questions[len(responses)].choices
-    # breakpoint()
+    res_len = len(session['responses'])
+
+    if not number == str(res_len):
+        number = res_len
+        return redirect(f'/questions/{number}')
+
+    prompt = survey.questions[res_len].prompt
+    choices = survey.questions[res_len].choices
+
     return render_template("question.html", prompt=prompt, choices=choices)
 
 @app.post('/answer')
 def answer():
     """updates responses and returns next question or completion page if survey is done"""
 
-    responses.append(request.form["answer"])
-    # responses_length = len(responses)
-    if (len(responses) == len(survey.questions)):
+    response = session['responses']
+    response.append(request.form["answer"])
+    session['responses'] = response
+
+    if (len(session['responses']) == len(survey.questions)):
         return redirect('/completion')
     else:
         # breakpoint()
-        return redirect(f'/questions/{len(responses)}')
+        return redirect(f'/questions/{len(response)}')
 
 @app.get('/completion')
 def completed_survey():
